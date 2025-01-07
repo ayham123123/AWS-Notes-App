@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    <body>
+        <h1>Your Notes</h1>
+        <div id="notesContainer"></div>
+        <script>
+            function loadNotes() {
+                const notes = JSON.parse(localStorage.getItem('notes')) || [];
+                const notesContainer = document.getElementById('notesContainer');
+                notesContainer.innerHTML = '';
+    
+                
+                const sortedNotes = [...notes].sort((a, b) => b.favorite - a.favorite);
+    
+                sortedNotes.forEach((note, index) => {
+                    const noteDiv = document.createElement('div');
+                    noteDiv.className = 'note';
+    
+                    noteDiv.innerHTML = `
+                        <h3>${note.subject}</h3>
+                        <p>${note.content}</p>
+                        <p><small><strong>Date:</strong> ${note.date}</small></p>
+                        ${note.favorite ? '<p><strong>★ Favorite</strong></p>' : ''}
+                        <div class="note-buttons">
+                            <button class="edit" onclick="editNote(${index})">Edit</button>
+                            <button class="delete" onclick="deleteNote(${index})">Delete</button>
+                        </div>
+                    `;
+    
+                    notesContainer.appendChild(noteDiv);
+                });
+            }
+    
+            function editNote(index) {
+                window.location.href = `display.html?edit=${index}`;
+            }
+    
+            function deleteNote(index) {
+                const notes = JSON.parse(localStorage.getItem('notes')) || [];
+                notes.splice(index, 1);
+                localStorage.setItem('notes', JSON.stringify(notes));
+                loadNotes();
+            }
+    
+            window.onload = loadNotes;
+        </script>
+    </body>
+    </html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <link rel="stylesheet" href="styles.css">
+        <script src="https://sdk.amazonaws.com/js/aws-sdk-2.1485.0.min.js"></script>
+        <script src="s3.js"></script>
+    </head>
+    <body>
+        <h1>Cloud Based Notes App</h1>
+        <h3>Use this to store Notes on the Cloud, not having to deal with System Constraints</h3>
+        <form id="noteForm">
+            <input type="hidden" id="editIndex" value="-1">
+            
+            <label for="subject">Subject of the note (if needed):</label>
+            <input type="text" id="subject" name="subject" placeholder="Enter a subject">
+            <br><br>
+            <label for="note">Write your note here:</label>
+            <br>
+            <textarea id="note" name="mainnote" rows="8" cols="50" placeholder="Enter your note" required></textarea>
+            <br><br>
+            <label for="date">Write a date for the note (if needed):</label>
+            <input type="text" id="date" name="date" placeholder="e.g., January 1, 2025">
+            <br><br>
+            <label for="fav">Mark this Note in your Favorites:</label>
+            <input type="checkbox" id="fav" name="fav" value="checked">
+            <br><br>
+            <button type="button" onclick="saveNote()">Save Note</button>
+            <button type="reset" onclick="resetForm()">Reset</button>
+        </form>
+
+        <script>
+            function saveNote() {
+    const subject = document.getElementById('subject').value || 'Untitled';
+    const noteContent = document.getElementById('note').value.trim();
+    const date = document.getElementById('date').value || new Date().toLocaleString();
+    const favorite = document.getElementById('fav').checked;
+
+    if (!noteContent) {
+        alert('Please write a note before saving.');
+        return;
+    }
+
+    const notes = JSON.parse(localStorage.getItem('notes')) || [];
+    const editIndex = parseInt(document.getElementById('editIndex').value);
+
+    const note = { subject, content: noteContent, date, favorite };
+
+    if (editIndex >= 0) {
+        notes[editIndex] = note;
+        alert('Note updated successfully!');
+    } else {
+        notes.push(note);
+        alert('Note saved successfully!');
+    }
+
+    localStorage.setItem('notes', JSON.stringify(notes));
+    uploadNoteToS3(note); 
+    resetForm();
+}   
+            function resetForm() {
+                document.getElementById('noteForm').reset();
+                document.getElementById('editIndex').value = -1;
+            }
+    
+            function loadNoteForEdit(index) {
+                const notes = JSON.parse(localStorage.getItem('notes')) || [];
+                const note = notes[index];
+    
+                document.getElementById('subject').value = note.subject;
+                document.getElementById('note').value = note.content;
+                document.getElementById('date').value = note.date;
+                document.getElementById('fav').checked = note.favorite;
+                document.getElementById('editIndex').value = index;
+            }
+        </script>
+    </body>
+    <footer>
+        <p>Designed by Ayham Huq</p>
+    </footer> 
+    </html>
